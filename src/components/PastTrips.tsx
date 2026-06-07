@@ -51,7 +51,7 @@ export default function PastTrips({ trips, onSelectTrip, onRefresh, onBack }: Pa
         onConfirm={executeDelete}
         onCancel={() => setDeleteTripId(null)}
       />
-      <div className="max-w-md mx-auto space-y-6">
+      <div className="max-w-5xl mx-auto space-y-6">
         
         {/* Top bar back row */}
         <div className="flex items-center gap-2">

@@ -7,10 +7,11 @@ import ImagePicker from './ImagePicker';
 
 interface AuthScreensProps {
   initialMode: 'login' | 'signup';
+  externalError?: string;
   onNavigate: (view: 'dashboard' | 'onboarding' | 'landing') => void;
 }
 
-export default function AuthScreens({ initialMode, onNavigate }: AuthScreensProps) {
+export default function AuthScreens({ initialMode, externalError, onNavigate }: AuthScreensProps) {
   const [mode, setMode] = useState<'login' | 'signup' | 'forgot'>(initialMode);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -18,6 +19,13 @@ export default function AuthScreens({ initialMode, onNavigate }: AuthScreensProp
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [avatar, setAvatar] = useState('');
+
+  // Use external error if provided
+  React.useEffect(() => {
+    if (externalError) {
+      setValidationError(externalError);
+    }
+  }, [externalError]);
 
   // Dynamically load existing avatar if the user types an email that already exists
   React.useEffect(() => {
@@ -69,8 +77,8 @@ export default function AuthScreens({ initialMode, onNavigate }: AuthScreensProp
     setValidationError('');
 
     if (mode === 'signup') {
-      if (!name || !email || !password) {
-        setValidationError('All fields are strictly required');
+      if (!name || !email || !password || !avatar) {
+        setValidationError('All fields, including a profile photo, are strictly required to create an account.');
         return;
       }
       if (password.length < 6) {

@@ -29,6 +29,7 @@ export default function App() {
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
   const [selectedTripTab, setSelectedTripTab] = useState<'itinerary' | 'map' | 'budget' | 'packing'>('itinerary');
   const [appReady, setAppReady] = useState(false);
+  const [validationError, setValidationError] = useState('');
   const [resetParams, setResetParams] = useState<{ email: string; token: string } | null>(null);
 
   // Connection tracking states
@@ -69,32 +70,6 @@ export default function App() {
     }
   }, []);
 
-  // Theme states
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    const saved = localStorage.getItem('theme');
-    if (saved === 'dark' || saved === 'light') return saved;
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return 'dark';
-    }
-    return 'light';
-  });
-
-  useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-      document.documentElement.style.colorScheme = 'dark';
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      document.documentElement.style.colorScheme = 'light';
-      localStorage.setItem('theme', 'light');
-    }
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light');
-  };
-
   // Initialize storage seeds and load active configs on mount
   useEffect(() => {
     initializeStorage();
@@ -107,6 +82,7 @@ export default function App() {
         let appUser = existingUsers.find(u => u.email.toLowerCase() === (firebaseUser.email || '').toLowerCase());
         
         if (!appUser && firebaseUser.email) {
+          // If no local user exists, create one with Firebase info
           appUser = signupUser(
             firebaseUser.displayName || firebaseUser.email.split('@')[0],
             firebaseUser.email,
@@ -115,6 +91,15 @@ export default function App() {
         }
         
         if (appUser) {
+          // Mandatory image check
+          if (!appUser.avatar) {
+            setCurrentUser(appUser);
+            setLocalUser(appUser);
+            setCurrentView('signup');
+            setValidationError('A profile image is required to access your dashboard. Please complete your profile.');
+            return;
+          }
+
           setCurrentUser(appUser);
           setLocalUser(appUser);
           setTrips(getTrips());
@@ -234,7 +219,9 @@ export default function App() {
             >
               <AuthScreens 
                 initialMode={currentView}
+                externalError={validationError}
                 onNavigate={(view) => {
+                  setValidationError(''); // Clear error on successful navigation
                   if (view === 'dashboard') {
                     refreshStorageData();
                     setCurrentView('dashboard');
@@ -266,7 +253,7 @@ export default function App() {
               key="app-main"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="md:max-w-md md:mx-auto md:bg-white md:min-h-screen md:shadow-[0_0_100px_rgba(0,0,0,0.1)] md:border-x md:border-slate-200 relative flex flex-col grow"
+              className="w-full max-w-6xl mx-auto md:bg-white md:min-h-[80vh] md:my-10 md:rounded-[40px] md:shadow-premium md:border md:border-slate-100 relative flex flex-col grow overflow-hidden"
             >
               <AnimatePresence mode="wait">
                 {/* Internal Route components switcher slots */}
@@ -290,8 +277,6 @@ export default function App() {
                         if (v === 'past-trips') setCurrentView('past-trips');
                         if (v === 'profile') setCurrentView('profile');
                       }}
-                      theme={theme}
-                      onToggleTheme={toggleTheme}
                     />
                   )}
 
@@ -332,8 +317,6 @@ export default function App() {
                       onRefreshUser={refreshStorageData}
                       onLogout={handleLogout}
                       onBack={() => setCurrentView('dashboard')}
-                      theme={theme}
-                      onToggleTheme={toggleTheme}
                     />
                   )}
                 </motion.div>

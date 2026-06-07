@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Compass, Calendar, Plus, MapPin, Wallet, CheckSquare, Sparkles, AlertTriangle, ArrowRight, Clock, Users, Sun, Moon, User, Image as ImageIcon } from 'lucide-react';
+import { Compass, Calendar, Plus, MapPin, Wallet, CheckSquare, Sparkles, AlertTriangle, ArrowRight, Clock, Users, User, Image as ImageIcon } from 'lucide-react';
 import { Trip, ItineraryEvent, Expense } from '../types';
 import { getEventsForTrip, getExpensesForTrip, getCurrencySymbol, deleteTrip } from '../lib/storage';
 import ConfirmModal from './ConfirmModal';
@@ -11,11 +11,9 @@ interface DashboardProps {
   onSelectTrip: (tripId: string) => void;
   onRefresh: () => void;
   onNavigate: (view: 'trip-wizard' | 'explore' | 'past-trips' | 'profile') => void;
-  theme: 'light' | 'dark';
-  onToggleTheme: () => void;
 }
 
-export default function Dashboard({ user, trips, onSelectTrip, onRefresh, onNavigate, theme, onToggleTheme }: DashboardProps) {
+export default function Dashboard({ user, trips, onSelectTrip, onRefresh, onNavigate }: DashboardProps) {
   const [deleteTripId, setDeleteTripId] = React.useState<string | null>(null);
   
   // Find next upcoming trip (starting in future, closest to today)
@@ -104,7 +102,7 @@ export default function Dashboard({ user, trips, onSelectTrip, onRefresh, onNavi
         onConfirm={executeDelete}
         onCancel={() => setDeleteTripId(null)}
       />
-      <div className="max-w-md mx-auto space-y-8">
+      <div className="max-w-5xl mx-auto space-y-8">
         
         {/* Header Greeting */}
         <div className="flex justify-between items-start">
@@ -118,14 +116,6 @@ export default function Dashboard({ user, trips, onSelectTrip, onRefresh, onNavi
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={onToggleTheme}
-              className="w-12 h-12 flex items-center justify-center bg-white shadow-premium rounded-2xl text-slate-600 hover:text-slate-900 transition-all active:scale-95 border border-slate-100 cursor-pointer"
-              aria-label="Toggle dark mode"
-              title={theme === 'dark' ? "Switch to light mode" : "Switch to dark mode"}
-            >
-              {theme === 'dark' ? <Sun className="w-5 h-5 text-amber-500 animate-[spin_12s_linear_infinite]" /> : <Moon className="w-5 h-5 text-slate-700" />}
-            </button>
             <button 
               onClick={() => onNavigate('profile')}
               className="w-12 h-12 rounded-2xl overflow-hidden ring-4 ring-white shadow-premium hover:scale-105 active:scale-95 transition-all shrink-0 cursor-pointer bg-slate-100 flex items-center justify-center border border-slate-100"

@@ -23,7 +23,7 @@ export default function BottomNavBar({ activeView, onNavigate }: BottomNavBarPro
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 px-3 py-2.5 pb-safe shadow-[0_-4px_24px_rgba(0,0,0,0.04)] md:max-w-md md:mx-auto md:left-1/2 md:-translate-x-1/2 md:rounded-t-3xl md:border-x">
+    <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 px-3 py-2.5 pb-safe shadow-[0_-4px_24px_rgba(0,0,0,0.04)] md:max-w-5xl md:mx-auto md:left-1/2 md:-translate-x-1/2 md:rounded-t-3xl md:border-x">
       <div className="flex justify-around items-center relative">
         
         {/* HOME button */}

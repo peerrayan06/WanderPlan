@@ -156,7 +156,7 @@ export default function TripWizard({ onBack, onTripCreated }: TripWizardProps) {
 
   return (
     <div className="bg-[#F8FAFC] min-h-screen pb-32 pt-6 px-4 selection:bg-[#2563EB] selection:text-white">
-      <div className="max-w-md mx-auto space-y-6">
+      <div className="max-w-4xl mx-auto space-y-6">
         
         {/* Top Header Controls */}
         <div className="flex items-center gap-2">

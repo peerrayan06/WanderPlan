@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { User, Mail, ShieldAlert, ArrowLeft, Check, LogOut, Sun, Moon } from 'lucide-react';
+import { User, Mail, ShieldAlert, ArrowLeft, Check, LogOut } from 'lucide-react';
 import { User as UserType } from '../types';
 import { getCurrentUser, setCurrentUser, wipeAllData } from '../lib/storage';
 import { deleteUserAccount } from '../lib/firebase';
@@ -11,13 +11,11 @@ interface ProfileSettingsProps {
   onRefreshUser: () => void;
   onLogout: () => void;
   onBack: () => void;
-  theme: 'light' | 'dark';
-  onToggleTheme: () => void;
 }
 
 // No-op for AVATAR_PRESETS constant removal if it was there before.
 
-export default function ProfileSettings({ user, onRefreshUser, onLogout, onBack, theme, onToggleTheme }: ProfileSettingsProps) {
+export default function ProfileSettings({ user, onRefreshUser, onLogout, onBack }: ProfileSettingsProps) {
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
   const [password, setPassword] = useState(user.password || 'password');
@@ -264,41 +262,6 @@ export default function ProfileSettings({ user, onRefreshUser, onLogout, onBack,
                     </motion.div>
                   )}
                 </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Preferences Section */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between px-2">
-              <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Preferences</h3>
-            </div>
-            
-            <div className="bg-white dark:bg-slate-900 rounded-[28px] border border-slate-100 dark:border-slate-800 shadow-premium p-6 space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                    {theme === 'dark' ? <Moon className="w-4 h-4 text-amber-500" /> : <Sun className="w-4 h-4 text-amber-500" />}
-                    Dark Mode theme
-                  </h4>
-                  <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium max-w-[185px]">Toggle between elegant light and deep premium dark canvas.</p>
-                </div>
-                
-                <button
-                  type="button"
-                  onClick={onToggleTheme}
-                  className={`w-14 h-7 rounded-full px-1 transition-all flex items-center group cursor-pointer border-0 outline-none ${
-                    theme === 'dark' ? 'bg-brand-primary shadow-lg shadow-brand-primary/10' : 'bg-slate-100'
-                  }`}
-                >
-                  <motion.div
-                    animate={{ x: theme === 'dark' ? 28 : 0 }}
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                    className="w-5 h-5 rounded-full bg-white shadow-sm flex items-center justify-center"
-                  >
-                    {theme === 'dark' && <Check className="w-2.5 h-2.5 text-slate-800 stroke-[4px]" />}
-                  </motion.div>
-                </button>
               </div>
             </div>
           </div>

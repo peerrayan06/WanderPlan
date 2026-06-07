@@ -35,31 +35,33 @@ export default function Explore({ onStartPlanning }: ExploreProps) {
 
   return (
     <div className="bg-[#F8FAFC] min-h-screen pb-32 pt-6 px-4 selection:bg-[#2563EB] selection:text-white text-left">
-      <div className="max-w-md mx-auto space-y-6">
+      <div className="max-w-5xl mx-auto space-y-6">
         
-        {/* Intro */}
-        <div className="space-y-1">
-          <h1 className="font-display font-extrabold text-2xl tracking-tight text-slate-900 flex items-center gap-2">
-            <Compass className="w-6 h-6 text-[#2563EB] active-spin" />
-            Wanderlust Feed
-          </h1>
-          <p className="text-xs text-slate-500">Pick an elite destination template to bootstrap your itinerary in seconds.</p>
-        </div>
+        {/* Intro Area */}
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+          <div className="space-y-1">
+            <h1 className="font-display font-extrabold text-2xl tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+              <Compass className="w-6 h-6 text-[#2563EB] active-spin" />
+              Wanderlust Feed
+            </h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Pick an elite destination template to bootstrap your itinerary in seconds.</p>
+          </div>
 
-        {/* Search Input Bar */}
-        <div className="relative">
-          <Search className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Search cities, countries..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-xs focus:outline-none focus:border-blue-500 shadow-sm font-semibold text-slate-800"
-          />
+          {/* Search Input Bar */}
+          <div className="relative w-full md:max-w-xs transition-colors duration-300">
+            <Search className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search cities, countries..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-3 text-xs focus:outline-none focus:border-blue-500 shadow-sm font-semibold text-slate-800 dark:text-white"
+            />
+          </div>
         </div>
 
         {/* Explore Feed Cards Grid */}
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.length > 0 ? (
             filtered.map((city) => (
               <div
