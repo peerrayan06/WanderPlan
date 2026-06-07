@@ -1,0 +1,431 @@
+import React, { useState } from 'react';
+import { motion } from 'motion/react';
+import { 
+  Compass, 
+  Calendar, 
+  Users, 
+  MapPin, 
+  DollarSign, 
+  ArrowLeft, 
+  Plus, 
+  Loader2, 
+  Image as ImageIcon,
+  Plane,
+  Car,
+  Ship,
+  ChevronDown,
+  Globe,
+  Wallet,
+  Sparkles
+} from 'lucide-react';
+import { PRESET_DESTINATIONS, DEFAULT_COVER, Trip } from '../types';
+import { saveTrip, saveEvent, saveEvents, seedPackingTemplate, getCurrentUser, getCurrencySymbol, setCurrentUser } from '../lib/storage';
+
+interface TripWizardProps {
+  onBack: () => void;
+  onTripCreated: (tripId: string) => void;
+}
+
+export default function TripWizard({ onBack, onTripCreated }: TripWizardProps) {
+  const [destination, setDestination] = useState('');
+  const [origin, setOrigin] = useState('');
+  const [originCountry, setOriginCountry] = useState('');
+  const [transportMode, setTransportMode] = useState<'airplane' | 'road' | 'waterway'>('airplane');
+  const [title, setTitle] = useState('');
+  const [startDate, setStartDate] = useState(() => {
+    const today = new Date();
+    today.setDate(today.getDate() + 7);
+    return today.toISOString().split('T')[0];
+  });
+  const [endDate, setEndDate] = useState(() => {
+    const today = new Date();
+    today.setDate(today.getDate() + 12);
+    return today.toISOString().split('T')[0];
+  });
+  const [partySize, setPartySize] = useState(2);
+  const [budget, setBudget] = useState(1500);
+  const [currency, setCurrency] = useState(() => getCurrentUser()?.currency || "INR");
+  const [coverUrl, setCoverUrl] = useState(DEFAULT_COVER);
+  const [error, setError] = useState('');
+  const [generating, setGenerating] = useState(false);
+  const [validating, setValidating] = useState(false);
+
+  const currencies = ["INR", "USD", "EUR", "GBP", "JPY", "AUD", "CAD", "AED"];
+
+  // Handle selected preset
+  const handlePresetSelect = (name: string) => {
+    setDestination(name);
+    if (!title) {
+      setTitle(`${name} Exploration`);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (generating) return;
+    setError('');
+
+    const trimmedDest = destination.trim();
+    if (!trimmedDest) {
+      setError('Please search or type a destination');
+      return;
+    }
+
+    if (!startDate || !endDate) {
+      setError('Please pick valid departure and return dates');
+      return;
+    }
+
+    if (new Date(startDate) > new Date(endDate)) {
+      setError('Return date must occur after the departure date');
+      return;
+    }
+
+    if (budget <= 0) {
+      setError('Trip budget must be a positive number');
+      return;
+    }
+
+    setValidating(false);
+    setError('');
+
+    try {
+      const activeUser = getCurrentUser();
+      
+      // Update user's preferred currency if it changed
+      if (activeUser && activeUser.currency !== currency) {
+        setCurrentUser({ ...activeUser, currency });
+      }
+
+      const matchedPreset = PRESET_DESTINATIONS.find(
+        p => p.name.toLowerCase() === trimmedDest.toLowerCase()
+      );
+      const tripTitle = title.trim() || `${trimmedDest} Getaway`;
+
+      const newTripId = `trip-${Date.now()}`;
+      const newTrip: Trip = {
+        id: newTripId,
+        userId: activeUser?.id || "user-1",
+        title: tripTitle,
+        destination: trimmedDest,
+        origin,
+        originCountry,
+        transportMode,
+        coverUrl: matchedPreset?.coverUrl || DEFAULT_COVER,
+        startDate,
+        endDate,
+        partySize,
+        budget,
+        budgetCurrency: currency,
+        createdAt: new Date().toISOString(),
+        transportInstructions: `Enjoy your trip from ${origin} to ${trimmedDest}!`,
+        budgetFeedback: "High-level budget tracking is active. Add expenses to see analysis."
+      };
+
+      saveTrip(newTrip);
+
+      // Create initial arrival event
+      saveEvent({
+        id: `ev-new-${Date.now()}`,
+        tripId: newTrip.id,
+        day: 1,
+        time: "14:00",
+        name: `Arrive in ${trimmedDest}`,
+        category: "accommodation",
+        location: `${trimmedDest} Central`,
+        lat: matchedPreset?.lat || 40.7128 + (Math.random() * 0.05 - 0.025),
+        lng: matchedPreset?.lng || -74.0060 + (Math.random() * 0.05 - 0.025),
+        notes: "Arrival and check-in. Start your adventure here!",
+        done: false,
+        order: 0
+      });
+
+      // Seed packing checklists
+      seedPackingTemplate(newTrip.id, "Clothing");
+      seedPackingTemplate(newTrip.id, "Toiletries");
+      seedPackingTemplate(newTrip.id, "Documents");
+
+      onTripCreated(newTrip.id);
+    } catch (err: any) {
+      console.error(err);
+      setError('Failed to create trip record. Please try again.');
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  return (
+    <div className="bg-[#F8FAFC] min-h-screen pb-32 pt-6 px-4 selection:bg-[#2563EB] selection:text-white">
+      <div className="max-w-md mx-auto space-y-6">
+        
+        {/* Top Header Controls */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onBack}
+            className="p-2 cursor-pointer bg-white border border-slate-200 rounded-xl text-slate-600 hover:text-slate-800 hover:border-slate-350 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div className="text-left">
+            <h1 className="font-display font-bold text-xl text-slate-900">Plan a New Voyage</h1>
+            <p className="text-xs text-slate-500">Configure your upcoming trip coordinates.</p>
+          </div>
+        </div>
+
+        {/* Validation Alert */}
+        {error && (
+          <div className="bg-red-50 border border-red-150 text-red-600 text-xs p-3 rounded-xl font-medium">
+            {error}
+          </div>
+        )}
+
+        {/* Wizard Form */}
+        <form onSubmit={handleSubmit} className="bg-white p-6 rounded-[24px] border border-slate-200 shadow-sm space-y-5 text-left">
+          
+          {/* Origin Section */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Where are you now?</label>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-3.5 w-3.5 h-3.5 text-slate-400" />
+                <input
+                  type="text"
+                  required
+                  placeholder="City"
+                  value={origin}
+                  onChange={(e) => setOrigin(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 rounded-xl pl-9 pr-2 py-2.5 text-xs focus:outline-none font-semibold text-slate-800"
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Country</label>
+              <div className="relative">
+                <Compass className="absolute left-3 top-3.5 w-3.5 h-3.5 text-slate-400" />
+                <input
+                  type="text"
+                  required
+                  placeholder="Country"
+                  value={originCountry}
+                  onChange={(e) => setOriginCountry(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 rounded-xl pl-9 pr-2 py-2.5 text-xs focus:outline-none font-semibold text-slate-800"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Transport Mode */}
+          <div className="space-y-3">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Primary Transport</label>
+            <div className="flex gap-2">
+              {[
+                { id: 'airplane', label: 'Airplanes', Icon: Plane, color: 'bg-blue-500' },
+                { id: 'road', label: 'By Road', Icon: Car, color: 'bg-emerald-500' },
+                { id: 'waterway', label: 'Waterways', Icon: Ship, color: 'bg-indigo-500' }
+              ].map((mode) => (
+                <button
+                  key={mode.id}
+                  type="button"
+                  onClick={() => setTransportMode(mode.id as any)}
+                  className={`flex-1 py-3 px-2 rounded-2xl border transition-all cursor-pointer flex flex-col items-center gap-2 relative overflow-hidden group ${
+                    transportMode === mode.id
+                      ? 'bg-slate-900 border-slate-900 text-white shadow-lg'
+                      : 'bg-white border-slate-100 text-slate-500 hover:border-slate-200'
+                  }`}
+                >
+                  <div className={`p-2 rounded-xl ${transportMode === mode.id ? 'bg-white/10' : 'bg-slate-50'} transition-colors`}>
+                    <mode.Icon className={`w-4 h-4 ${transportMode === mode.id ? 'text-white' : 'text-slate-400'}`} />
+                  </div>
+                  <span className={`text-[10px] font-black uppercase tracking-tight ${transportMode === mode.id ? 'text-white' : 'text-slate-500'}`}>
+                    {mode.label}
+                  </span>
+                  
+                  {transportMode === mode.id && (
+                    <motion.div 
+                      layoutId="transport-indicator"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-primary"
+                    />
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Destination & Autocomplete */}
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Where to?</label>
+            <div className="relative">
+              <MapPin className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                required
+                placeholder="e.g. Rome, Tokyo, Barcelona, Bali"
+                value={destination}
+                onChange={(e) => {
+                  setDestination(e.target.value);
+                  if (!title) setTitle(`${e.target.value} Exploration`);
+                }}
+                className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors font-medium text-slate-800"
+              />
+            </div>
+
+            {/* Quick Presets Carousel Grid */}
+            <div className="pt-1.5">
+              <span className="text-[9px] font-bold text-slate-400 block mb-1 uppercase tracking-wider">Curated Shortcuts:</span>
+              <div className="flex flex-wrap gap-1.5">
+                {PRESET_DESTINATIONS.map((preset) => (
+                  <button
+                    key={preset.name}
+                    type="button"
+                    onClick={() => handlePresetSelect(preset.name)}
+                    className={`text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-colors cursor-pointer ${
+                      destination.toLowerCase() === preset.name.toLowerCase()
+                        ? 'bg-[#EFF6FF] border-[#BFDBFE] text-[#2563EB]'
+                        : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 hover:border-slate-300'
+                    }`}
+                  >
+                    <span className="mr-1">{preset.flag}</span>
+                    {preset.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Trip Custom Title */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Trip Title / Memo</label>
+            <div className="relative">
+              <Compass className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                placeholder="e.g. Grand Honey Moon 2026"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors font-semibold text-slate-800"
+              />
+            </div>
+          </div>
+
+          {/* Date Picker Grid */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Start Date</label>
+              <div className="relative">
+                <Calendar className="absolute left-3 top-3.5 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                <input
+                  type="date"
+                  required
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 rounded-xl pl-9 pr-2 py-2.5 text-xs focus:outline-none font-semibold text-slate-800"
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">End Date</label>
+              <div className="relative">
+                <Calendar className="absolute left-3 top-3.5 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                <input
+                  type="date"
+                  required
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 rounded-xl pl-9 pr-2 py-2.5 text-xs focus:outline-none font-semibold text-slate-800"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Party Size Counter Selector */}
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Traveller Count</label>
+            <div className="flex gap-1.5">
+              {[1, 2, 3, 4, 5, 6].map((num) => (
+                <button
+                  key={num}
+                  type="button"
+                  onClick={() => setPartySize(num)}
+                  className={`flex-1 py-2 text-xs font-bold rounded-xl border transition-all cursor-pointer ${
+                    partySize === num
+                      ? 'bg-[#2563EB] border-[#2563EB] text-white shadow-sm'
+                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  {num === 1 ? 'Solo' : `${num}`}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Set Budget Input */}
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Trip Economy</label>
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <div className="absolute left-3.5 top-[13.5px] text-xs font-extrabold text-slate-400 pointer-events-none select-none font-sans">
+                  {getCurrencySymbol(currency)}
+                </div>
+                <input
+                  type="number"
+                  required
+                  min="100"
+                  step="50"
+                  value={budget}
+                  onChange={(e) => setBudget(Number(e.target.value))}
+                  className="w-full bg-white border border-slate-200 focus:border-brand-primary rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none transition-all font-black text-slate-800 shadow-sm"
+                  placeholder="Set Budget"
+                />
+              </div>
+              
+              <div className="relative w-28">
+                <Globe className="absolute left-3 top-3.5 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                <select
+                  value={currency}
+                  onChange={(e) => setCurrency(e.target.value)}
+                  className="w-full bg-white border border-slate-200 rounded-xl pl-8 pr-2 py-3 text-[10px] font-black appearance-none outline-none focus:border-brand-primary transition-all text-slate-700 shadow-sm"
+                >
+                  {currencies.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-2 top-4 w-3 h-3 text-slate-400 pointer-events-none" />
+              </div>
+            </div>
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight flex items-center gap-1 px-1">
+               <Wallet className="w-3 h-3" />
+               We'll track your spend against this cap
+            </p>
+          </div>
+
+          {/* Submit Action */}
+          <button
+            type="submit"
+            disabled={generating || validating}
+            className={`w-full ${(generating || validating) ? 'bg-slate-200' : 'bg-slate-900 hover:bg-black'} text-white font-black py-4 rounded-xl shadow-xl transition-all flex items-center justify-center gap-3 text-[11px] uppercase tracking-[0.2em] mt-2 cursor-pointer disabled:cursor-not-allowed`}
+          >
+            {validating ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Preparing Voyage...
+              </>
+            ) : generating ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin text-brand-primary" />
+                Building Timeline...
+              </>
+            ) : (
+              <>
+                <Plus className="w-4 h-4 text-brand-primary" />
+                Create Voyage Plan
+              </>
+            )}
+          </button>
+
+        </form>
+      </div>
+    </div>
+  );
+}

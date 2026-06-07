@@ -1,0 +1,6 @@
+{
+  "name": "WanderPlan",
+  "description": "A beautiful, mobile-friendly travel planner SaaS tool that features a day-by-day itinerary builder, budget tracker, packing checklist, and interactive map views.",
+  "requestFramePermissions": ["geolocation", "camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
