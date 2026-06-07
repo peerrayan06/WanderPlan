@@ -131,8 +131,8 @@ export default function TripDetail({ tripId, initialTab = 'itinerary', onBack, o
       />
       
       {/* Top sticky detail control header */}
-      <nav className="fixed top-0 left-0 right-0 z-30 bg-white dark:bg-[#0F172A] border-b border-slate-200 dark:border-slate-800 px-4 py-3 md:max-w-5xl md:mx-auto md:left-1/2 md:-translate-x-1/2 md:rounded-t-3xl md:border-x md:border-x-slate-200 md:dark:border-x-slate-800">
-        <div className="flex items-center justify-between">
+      <nav className="fixed top-0 left-0 right-0 z-30 bg-white dark:bg-[#0F172A] border-b border-slate-200 dark:border-slate-800 px-4 py-3 lg:py-5 md:max-w-7xl md:mx-auto md:left-0 md:right-0 md:rounded-t-3xl md:border-x md:border-x-slate-200 md:dark:border-x-slate-800">
+        <div className="flex items-center justify-between max-w-5xl mx-auto">
           <div className="flex items-center gap-2.5 min-w-0">
             <button
               onClick={onBack}
@@ -211,19 +211,21 @@ export default function TripDetail({ tripId, initialTab = 'itinerary', onBack, o
       </nav>
 
       {/* Main Tab content router container */}
-      <div className="pt-26 px-4 max-w-5xl mx-auto relative z-10 w-full">
-        {activeTab === 'itinerary' && (
-          <ItineraryTab trip={trip} onRefresh={onRefresh} />
-        )}
-        {activeTab === 'map' && (
-          <MapTab trip={trip} />
-        )}
-        {activeTab === 'budget' && (
-          <BudgetTab trip={trip} onRefresh={onRefresh} />
-        )}
-        {activeTab === 'packing' && (
-          <PackingTab trip={trip} />
-        )}
+      <div className="pt-28 lg:pt-36 px-4 max-w-7xl mx-auto relative z-10 w-full">
+        <div className="max-w-5xl mx-auto">
+          {activeTab === 'itinerary' && (
+            <ItineraryTab trip={trip} onRefresh={onRefresh} />
+          )}
+          {activeTab === 'map' && (
+            <MapTab trip={trip} />
+          )}
+          {activeTab === 'budget' && (
+            <BudgetTab trip={trip} onRefresh={onRefresh} />
+          )}
+          {activeTab === 'packing' && (
+            <PackingTab trip={trip} />
+          )}
+        </div>
       </div>
 
       {/* Edit modal popup sheet screen overlay */}

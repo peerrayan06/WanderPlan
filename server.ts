@@ -51,28 +51,30 @@ app.post('/api/validate-locations', async (req, res) => {
   "error": string (a helpful error message if any location is invalid),
   "suggestedImage": string (a direct Unsplash URL for the destination)`;
 
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            valid: { type: Type.BOOLEAN },
-            error: { type: Type.STRING },
-            suggestedImage: { type: Type.STRING }
-          },
-          required: ["valid", "error", "suggestedImage"]
-        }
+  const model = ai.getGenerativeModel({
+    model: "gemini-1.5-flash",
+    generationConfig: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          valid: { type: Type.BOOLEAN },
+          error: { type: Type.STRING },
+          suggestedImage: { type: Type.STRING }
+        },
+        required: ["valid", "error", "suggestedImage"]
       }
-    });
+    }
+  });
 
-    const result = JSON.parse(response.text || '{"valid": false, "error": "Validation failed", "suggestedImage": ""}');
-    res.json(result);
-  } catch (error) {
-    res.json({ valid: true }); // Fallback to allowing if AI is down
+  try {
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+    const data = JSON.parse(text || '{"valid": false, "error": "Validation failed", "suggestedImage": ""}');
+    res.json(data);
+  } catch (error: any) {
+    console.error('Validation error:', error);
+    res.json({ valid: true, suggestedImage: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&q=80&w=1200" }); // Fallback
   }
 });
 
@@ -125,53 +127,54 @@ app.post('/api/generate-itinerary', async (req, res) => {
   1. Tell the user how many core activities and luxury experiences they can afford with this budget.
   2. Critique the budget. State clearly if it is "right", "wrong", "less good", or "medium" for this length of stay and group size. Explain why in a friendly tone.`;
 
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            itinerary: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  day: { type: Type.INTEGER, description: "Day number (starting from 1)" },
-                  time: { type: Type.STRING, description: "Time in HH:MM format" },
-                  name: { type: Type.STRING, description: "Activity name" },
-                  category: { type: Type.STRING, description: "activity, food, transport, or accommodation" },
-                  location: { type: Type.STRING, description: "Specific place name" },
-                  notes: { type: Type.STRING, description: "Details about why it is great" },
-                  lat: { type: Type.NUMBER, description: "Approximate latitude" },
-                  lng: { type: Type.NUMBER, description: "Approximate longitude" },
-                  costEstimate: { type: Type.NUMBER, description: "Numerical cost estimate" },
-                  tags: { 
-                    type: Type.ARRAY, 
-                    items: { type: Type.STRING },
-                    description: "Relevant keywords"
-                  }
-                },
-                required: ["day", "time", "name", "category", "location", "notes", "lat", "lng", "costEstimate", "tags"]
-              }
-            },
-            transportInstructions: { 
-              type: Type.STRING, 
-              description: "Detailed instructions on how to get there including airlines if applicable" 
-            },
-            budgetFeedback: { 
-              type: Type.STRING, 
-              description: "Critique of the budget and count of things they can do" 
+  const model = ai.getGenerativeModel({
+    model: "gemini-1.5-flash",
+    generationConfig: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          itinerary: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                day: { type: Type.INTEGER, description: "Day number (starting from 1)" },
+                time: { type: Type.STRING, description: "Time in HH:MM format" },
+                name: { type: Type.STRING, description: "Activity name" },
+                category: { type: Type.STRING, description: "activity, food, transport, or accommodation" },
+                location: { type: Type.STRING, description: "Specific place name" },
+                notes: { type: Type.STRING, description: "Details about why it is great" },
+                lat: { type: Type.NUMBER, description: "Approximate latitude" },
+                lng: { type: Type.NUMBER, description: "Approximate longitude" },
+                costEstimate: { type: Type.NUMBER, description: "Numerical cost estimate" },
+                tags: { 
+                  type: Type.ARRAY, 
+                  items: { type: Type.STRING },
+                  description: "Relevant keywords"
+                }
+              },
+              required: ["day", "time", "name", "category", "location", "notes", "lat", "lng", "costEstimate", "tags"]
             }
           },
-          required: ["itinerary", "transportInstructions", "budgetFeedback"]
-        }
+          transportInstructions: { 
+            type: Type.STRING, 
+            description: "Detailed instructions on how to get there including airlines if applicable" 
+          },
+          budgetFeedback: { 
+            type: Type.STRING, 
+            description: "Critique of the budget and count of things they can do" 
+          }
+        },
+        required: ["itinerary", "transportInstructions", "budgetFeedback"]
       }
-    });
+    }
+  });
 
-    const result = JSON.parse(response.text || '{}');
+  try {
+    const response = await model.generateContent(prompt);
+    const text = response.response.text();
+    const result = JSON.parse(text || '{}');
     res.json(result);
   } catch (error: any) {
     console.error('Gemini error:', error);
@@ -198,10 +201,9 @@ app.get('/api/exchange-rates', async (req, res) => {
       const prompt = `Provide the current approximate exchange rates for ${base} against EUR, GBP, JPY, INR, CAD, AUD, CHF, CNY, AED. 
       Return a JSON object with a "rates" field containing the currency codes as keys and numerical rates as values.`;
       
-      const aiResponse = await ai.models.generateContent({
+      const model = ai.getGenerativeModel({
         model: "gemini-1.5-flash",
-        contents: prompt,
-        config: {
+        generationConfig: {
           responseMimeType: "application/json",
           responseSchema: {
             type: Type.OBJECT,
@@ -216,7 +218,8 @@ app.get('/api/exchange-rates', async (req, res) => {
         }
       });
       
-      const ratesData = JSON.parse(aiResponse.text || '{"rates": {}}');
+      const result = await model.generateContent(prompt);
+      const ratesData = JSON.parse(result.response.text() || '{"rates": {}}');
       res.json({ ...ratesData, base_code: base, provider: 'gemini_estimation' });
     } catch (err) {
       res.status(500).json({ error: 'Failed to fetch rates' });
@@ -335,8 +338,10 @@ app.post('/api/send-reset-email', async (req, res) => {
 });
 
 async function startServer() {
+  const isProd = process.env.NODE_ENV === "production";
+  
   // Vite middleware for development
-  if (process.env.NODE_ENV !== "production") {
+  if (!isProd) {
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
@@ -351,11 +356,12 @@ async function startServer() {
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Server running on http://localhost:${PORT} [${isProd ? 'PROD' : 'DEV'}]`);
   });
 }
 
-if (process.env.NODE_ENV !== "production") {
+// Only call startServer if not on Vercel, but let export exist for serverless environments
+if (!process.env.VERCEL) {
   startServer();
 }
 

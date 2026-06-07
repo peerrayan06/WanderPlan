@@ -175,8 +175,8 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
       </div>
 
       {/* Steps Content Area */}
-      <div className="grow flex items-center justify-center max-w-xl lg:max-w-4xl mx-auto w-full py-6">
-        <div className="bg-white p-6 sm:p-8 lg:p-12 rounded-[24px] border border-slate-200 shadow-sm w-full relative">
+      <div className="grow flex items-center justify-center max-w-3xl lg:max-w-5xl mx-auto w-full py-6">
+        <div className="bg-white p-6 sm:p-10 lg:p-16 rounded-[40px] border border-slate-200 shadow-sm w-full relative">
           
           {/* Progress indicators */}
           <div className="flex justify-between items-center mb-8">
