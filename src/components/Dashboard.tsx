@@ -274,56 +274,77 @@ export default function Dashboard({ user, trips, onSelectTrip, onRefresh, onNavi
         )}
 
         {/* Quick Actions Grid Shortcuts */}
-        <div className="space-y-2">
-          <h3 className="text-xs font-extrabold text-[#64748B] uppercase tracking-widest text-left">Quick Navigation</h3>
-          
-          <div className="grid grid-cols-3 gap-3">
-            <button
-              onClick={() => onNavigate('trip-wizard')}
-              className="p-4 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl text-center space-y-1.5 shadow-sm active:scale-95 transition-all cursor-pointer text-left"
-            >
-              <div className="w-9 h-9 bg-orange-50 text-orange-600 rounded-xl flex items-center justify-center mx-auto">
-                <Plus className="w-5 h-5 stroke-[2.5px]" />
-              </div>
-              <span className="text-xs font-bold text-slate-800 block leading-tight text-center">New Trip</span>
-            </button>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="space-y-4">
+            <h3 className="text-xs font-extrabold text-[#64748B] uppercase tracking-widest text-left">Quick Navigation</h3>
+            
+            <div className="grid grid-cols-3 gap-3">
+              <button
+                onClick={() => onNavigate('trip-wizard')}
+                className="p-4 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl text-center space-y-1.5 shadow-sm active:scale-95 transition-all cursor-pointer text-left"
+              >
+                <div className="w-9 h-9 bg-orange-50 text-orange-600 rounded-xl flex items-center justify-center mx-auto">
+                  <Plus className="w-5 h-5 stroke-[2.5px]" />
+                </div>
+                <span className="text-xs font-bold text-slate-800 block leading-tight text-center">New Trip</span>
+              </button>
 
-            <button
-              onClick={() => onNavigate('explore')}
-              className="p-4 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl text-center space-y-1.5 shadow-sm active:scale-95 transition-all cursor-pointer text-left"
-            >
-              <div className="w-9 h-9 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mx-auto">
-                <Compass className="w-5 h-5" />
-              </div>
-              <span className="text-xs font-bold text-slate-800 block leading-tight text-center">Explore</span>
-            </button>
+              <button
+                onClick={() => onNavigate('explore')}
+                className="p-4 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl text-center space-y-1.5 shadow-sm active:scale-95 transition-all cursor-pointer text-left"
+              >
+                <div className="w-9 h-9 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mx-auto">
+                  <Compass className="w-5 h-5" />
+                </div>
+                <span className="text-xs font-bold text-slate-800 block leading-tight text-center">Explore</span>
+              </button>
 
-            <button
-              id="dashboard-archived-btn"
-              onClick={() => onNavigate('past-trips')}
-              className="p-4 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl text-center space-y-1.5 shadow-sm active:scale-95 transition-all cursor-pointer text-left"
-            >
-              <div className="w-9 h-9 bg-green-50 text-green-600 rounded-xl flex items-center justify-center mx-auto">
-                <Calendar className="w-5 h-5" />
+              <button
+                id="dashboard-archived-btn"
+                onClick={() => onNavigate('past-trips')}
+                className="p-4 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl text-center space-y-1.5 shadow-sm active:scale-95 transition-all cursor-pointer text-left"
+              >
+                <div className="w-9 h-9 bg-green-50 text-green-600 rounded-xl flex items-center justify-center mx-auto">
+                  <Calendar className="w-5 h-5" />
+                </div>
+                <span className="text-xs font-bold text-slate-800 block leading-tight text-center">Archived</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Stats / Hero Mini Summary (Optional UI addition if helpful for space) */}
+          <div className="bg-slate-50 p-6 rounded-[28px] border border-slate-100 hidden md:flex flex-col justify-center">
+            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Account Snapshot</h3>
+            <div className="flex items-center gap-6">
+              <div className="text-center">
+                <div className="text-2xl font-black text-slate-900">{trips.length}</div>
+                <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Journeys</div>
               </div>
-              <span className="text-xs font-bold text-slate-800 block leading-tight text-center">Archived</span>
-            </button>
+              <div className="h-8 w-[1px] bg-slate-200" />
+              <div className="text-center">
+                <div className="text-2xl font-black text-blue-600">{trips.filter(t => !t.archived).length}</div>
+                <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Active</div>
+              </div>
+            </div>
+            <p className="mt-4 text-[11px] text-slate-400 font-medium leading-relaxed">
+              Plan your routes, set budgets, and share your trail logs with friends. Your travel portfolio is synced across all devices.
+            </p>
           </div>
         </div>
 
         {/* Horizontal Trip Scroll of Remaining Active Trips */}
         {activeTrips.length > 1 && (
-          <div className="space-y-2 text-left">
+          <div className="space-y-4 text-left">
             <h3 className="text-xs font-extrabold text-[#64748B] uppercase tracking-widest">My Travel Portfolio ({activeTrips.length})</h3>
             
-            <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar snap-x snap-mandatory">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {activeTrips.map((tour) => {
                 const results = getCardStats(tour);
                 return (
                   <div
                     key={tour.id}
                     onClick={() => onSelectTrip(tour.id)}
-                    className="w-64 bg-white rounded-[24px] border border-slate-200 p-3.5 shadow-sm shrink-0 snap-center cursor-pointer hover:border-slate-300 transition-all space-y-3"
+                    className="w-full bg-white rounded-[24px] border border-slate-200 p-3.5 shadow-sm cursor-pointer hover:border-blue-400 hover:shadow-premium transition-all space-y-3"
                   >
                     <div className="relative h-28 rounded-2xl overflow-hidden bg-slate-50 flex items-center justify-center">
                       {tour.coverUrl ? (

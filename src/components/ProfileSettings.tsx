@@ -101,13 +101,13 @@ export default function ProfileSettings({ user, onRefreshUser, onLogout, onBack 
         onCancel={() => setShowDeleteConfirm(false)}
       />
       
-      <div className="max-w-md mx-auto space-y-8">
+      <div className="max-w-5xl mx-auto space-y-8">
         
         {/* Top Header Bar */}
         <div className="flex items-center justify-between">
           <button
             onClick={onBack}
-            className="w-12 h-12 flex items-center justify-center bg-white shadow-premium rounded-2xl text-slate-600 hover:text-slate-900 transition-all active:scale-95 border border-slate-100"
+            className="w-12 h-12 flex items-center justify-center bg-white shadow-premium rounded-2xl text-slate-600 hover:text-slate-900 transition-all active:scale-95 border border-slate-100 cursor-pointer"
           >
             <ArrowLeft className="w-5 h-5 stroke-[2.5px]" />
           </button>
@@ -155,7 +155,7 @@ export default function ProfileSettings({ user, onRefreshUser, onLogout, onBack 
         )}
 
         {/* Settings Sections */}
-        <div className="space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
           
           {/* Identity Section */}
           <form onSubmit={handleSaveInfo} className="space-y-4">
@@ -163,7 +163,7 @@ export default function ProfileSettings({ user, onRefreshUser, onLogout, onBack 
               <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Personal Identity</h3>
             </div>
             
-            <div className="bg-white dark:bg-slate-900 rounded-[32px] border border-slate-100 dark:border-slate-800 shadow-premium p-6 space-y-6">
+            <div className="bg-white dark:bg-slate-900 rounded-[32px] border border-slate-100 dark:border-slate-800 shadow-premium p-6 sm:p-8 space-y-6">
               {/* Name Input */}
               <div className="space-y-2 text-left">
                 <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.1em] px-1">Display Name</label>
@@ -266,35 +266,37 @@ export default function ProfileSettings({ user, onRefreshUser, onLogout, onBack 
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="pt-2 space-y-4">
-            <button
-              type="button"
-              onClick={onLogout}
-              className="w-full bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-200 font-bold py-4 rounded-2xl border border-slate-100 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-sm cursor-pointer"
-            >
-              <LogOut className="w-5 h-5" />
-              Secure Log Out
-            </button>
-          </div>
-        </div>
-
-        {/* Destructive Section */}
-        <div className="pt-8 border-t border-slate-200 dark:border-slate-800">
-          <div className="bg-red-50/50 dark:bg-red-950/15 rounded-[28px] border border-red-100 dark:border-red-900/30 p-6 space-y-4">
-            <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
-              <ShieldAlert className="w-5 h-5 stroke-[2.5px]" />
-              <h4 className="font-display font-bold text-base">Security Danger Zone</h4>
+          {/* Action and Destructive Buttons Below Grid */}
+          <div className="md:col-span-2 pt-2 space-y-8">
+            <div className="space-y-4">
+              <button
+                type="button"
+                onClick={onLogout}
+                className="w-full bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-200 font-bold py-4 rounded-2xl border border-slate-100 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-sm cursor-pointer"
+              >
+                <LogOut className="w-5 h-5" />
+                Secure Log Out
+              </button>
             </div>
-            <p className="text-[11px] text-red-600/70 dark:text-red-400/80 font-medium leading-relaxed">
-              Permanently erasing your account will delete every itinerary, trail log, and saved expense. This is immediate and cannot be undone.
-            </p>
-            <button
-              onClick={handleDeleteAccount}
-              className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-red-500/20 transition-all active:scale-[0.98] cursor-pointer text-xs border-0"
-            >
-              Destroy Account Permanently
-            </button>
+
+            {/* Destructive Section */}
+            <div className="pt-8 border-t border-slate-200 dark:border-slate-800">
+              <div className="bg-red-50/50 dark:bg-red-950/15 rounded-[28px] border border-red-100 dark:border-red-900/30 p-6 sm:p-10 space-y-4">
+                <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                  <ShieldAlert className="w-5 h-5 stroke-[2.5px]" />
+                  <h4 className="font-display font-bold text-base">Security Danger Zone</h4>
+                </div>
+                <p className="text-[11px] text-red-600/70 dark:text-red-400/80 font-medium leading-relaxed max-w-2xl">
+                  Permanently erasing your account will delete every itinerary, trail log, and saved expense. This is immediate and cannot be undone. All your trips will be wiped from the database.
+                </p>
+                <button
+                  onClick={handleDeleteAccount}
+                  className="w-full md:w-auto md:px-8 bg-red-500 hover:bg-red-600 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-red-500/20 transition-all active:scale-[0.98] cursor-pointer text-xs border-0"
+                >
+                  Destroy Account Permanently
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 

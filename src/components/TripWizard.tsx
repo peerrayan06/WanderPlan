@@ -180,224 +180,212 @@ export default function TripWizard({ onBack, onTripCreated }: TripWizardProps) {
         )}
 
         {/* Wizard Form */}
-        <form onSubmit={handleSubmit} className="bg-white p-6 rounded-[24px] border border-slate-200 shadow-sm space-y-5 text-left">
+        <form onSubmit={handleSubmit} className="bg-white p-6 sm:p-10 rounded-[24px] border border-slate-200 shadow-sm space-y-8 text-left">
           
-          {/* Origin Section */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Where are you now?</label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-3.5 w-3.5 h-3.5 text-slate-400" />
-                <input
-                  type="text"
-                  required
-                  placeholder="City"
-                  value={origin}
-                  onChange={(e) => setOrigin(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 rounded-xl pl-9 pr-2 py-2.5 text-xs focus:outline-none font-semibold text-slate-800"
-                />
-              </div>
-            </div>
-            
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Country</label>
-              <div className="relative">
-                <Compass className="absolute left-3 top-3.5 w-3.5 h-3.5 text-slate-400" />
-                <input
-                  type="text"
-                  required
-                  placeholder="Country"
-                  value={originCountry}
-                  onChange={(e) => setOriginCountry(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 rounded-xl pl-9 pr-2 py-2.5 text-xs focus:outline-none font-semibold text-slate-800"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Transport Mode */}
-          <div className="space-y-3">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Primary Transport</label>
-            <div className="flex gap-2">
-              {[
-                { id: 'airplane', label: 'Airplanes', Icon: Plane, color: 'bg-blue-500' },
-                { id: 'road', label: 'By Road', Icon: Car, color: 'bg-emerald-500' },
-                { id: 'waterway', label: 'Waterways', Icon: Ship, color: 'bg-indigo-500' }
-              ].map((mode) => (
-                <button
-                  key={mode.id}
-                  type="button"
-                  onClick={() => setTransportMode(mode.id as any)}
-                  className={`flex-1 py-3 px-2 rounded-2xl border transition-all cursor-pointer flex flex-col items-center gap-2 relative overflow-hidden group ${
-                    transportMode === mode.id
-                      ? 'bg-slate-900 border-slate-900 text-white shadow-lg'
-                      : 'bg-white border-slate-100 text-slate-500 hover:border-slate-200'
-                  }`}
-                >
-                  <div className={`p-2 rounded-xl ${transportMode === mode.id ? 'bg-white/10' : 'bg-slate-50'} transition-colors`}>
-                    <mode.Icon className={`w-4 h-4 ${transportMode === mode.id ? 'text-white' : 'text-slate-400'}`} />
-                  </div>
-                  <span className={`text-[10px] font-black uppercase tracking-tight ${transportMode === mode.id ? 'text-white' : 'text-slate-500'}`}>
-                    {mode.label}
-                  </span>
-                  
-                  {transportMode === mode.id && (
-                    <motion.div 
-                      layoutId="transport-indicator"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-primary"
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Origin Section */}
+            <div className="space-y-4">
+              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-2">1. Origin Coordinates</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">City</label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-3.5 w-3.5 h-3.5 text-slate-400" />
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Mumbai"
+                      value={origin}
+                      onChange={(e) => setOrigin(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 rounded-xl pl-9 pr-2 py-2.5 text-xs focus:outline-none font-semibold text-slate-800"
                     />
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Destination & Autocomplete */}
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Where to?</label>
-            <div className="relative">
-              <MapPin className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400" />
-              <input
-                type="text"
-                required
-                placeholder="e.g. Rome, Tokyo, Barcelona, Bali"
-                value={destination}
-                onChange={(e) => {
-                  setDestination(e.target.value);
-                  if (!title) setTitle(`${e.target.value} Exploration`);
-                }}
-                className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors font-medium text-slate-800"
-              />
-            </div>
-
-            {/* Quick Presets Carousel Grid */}
-            <div className="pt-1.5">
-              <span className="text-[9px] font-bold text-slate-400 block mb-1 uppercase tracking-wider">Curated Shortcuts:</span>
-              <div className="flex flex-wrap gap-1.5">
-                {PRESET_DESTINATIONS.map((preset) => (
-                  <button
-                    key={preset.name}
-                    type="button"
-                    onClick={() => handlePresetSelect(preset.name)}
-                    className={`text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-colors cursor-pointer ${
-                      destination.toLowerCase() === preset.name.toLowerCase()
-                        ? 'bg-[#EFF6FF] border-[#BFDBFE] text-[#2563EB]'
-                        : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 hover:border-slate-300'
-                    }`}
-                  >
-                    <span className="mr-1">{preset.flag}</span>
-                    {preset.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Trip Custom Title */}
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Trip Title / Memo</label>
-            <div className="relative">
-              <Compass className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400" />
-              <input
-                type="text"
-                placeholder="e.g. Grand Honey Moon 2026"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors font-semibold text-slate-800"
-              />
-            </div>
-          </div>
-
-          {/* Date Picker Grid */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Start Date</label>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-3.5 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
-                <input
-                  type="date"
-                  required
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 rounded-xl pl-9 pr-2 py-2.5 text-xs focus:outline-none font-semibold text-slate-800"
-                />
-              </div>
-            </div>
-            
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">End Date</label>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-3.5 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
-                <input
-                  type="date"
-                  required
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 rounded-xl pl-9 pr-2 py-2.5 text-xs focus:outline-none font-semibold text-slate-800"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Party Size Counter Selector */}
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Traveller Count</label>
-            <div className="flex gap-1.5">
-              {[1, 2, 3, 4, 5, 6].map((num) => (
-                <button
-                  key={num}
-                  type="button"
-                  onClick={() => setPartySize(num)}
-                  className={`flex-1 py-2 text-xs font-bold rounded-xl border transition-all cursor-pointer ${
-                    partySize === num
-                      ? 'bg-[#2563EB] border-[#2563EB] text-white shadow-sm'
-                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-                  }`}
-                >
-                  {num === 1 ? 'Solo' : `${num}`}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Set Budget Input */}
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Trip Economy</label>
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <div className="absolute left-3.5 top-[13.5px] text-xs font-extrabold text-slate-400 pointer-events-none select-none font-sans">
-                  {getCurrencySymbol(currency)}
+                  </div>
                 </div>
-                <input
-                  type="number"
-                  required
-                  min="100"
-                  step="50"
-                  value={budget}
-                  onChange={(e) => setBudget(Number(e.target.value))}
-                  className="w-full bg-white border border-slate-200 focus:border-brand-primary rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none transition-all font-black text-slate-800 shadow-sm"
-                  placeholder="Set Budget"
-                />
+                
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Country</label>
+                  <div className="relative">
+                    <Compass className="absolute left-3 top-3.5 w-3.5 h-3.5 text-slate-400" />
+                    <input
+                      type="text"
+                      required
+                      placeholder="India"
+                      value={originCountry}
+                      onChange={(e) => setOriginCountry(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 rounded-xl pl-9 pr-2 py-2.5 text-xs focus:outline-none font-semibold text-slate-800"
+                    />
+                  </div>
+                </div>
               </div>
-              
-              <div className="relative w-28">
-                <Globe className="absolute left-3 top-3.5 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
-                <select
-                  value={currency}
-                  onChange={(e) => setCurrency(e.target.value)}
-                  className="w-full bg-white border border-slate-200 rounded-xl pl-8 pr-2 py-3 text-[10px] font-black appearance-none outline-none focus:border-brand-primary transition-all text-slate-700 shadow-sm"
-                >
-                  {currencies.map(c => (
-                    <option key={c} value={c}>{c}</option>
+
+              {/* Transport Mode */}
+              <div className="space-y-3 pt-2">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Primary Transport</label>
+                <div className="flex gap-2">
+                  {[
+                    { id: 'airplane', label: 'Air', Icon: Plane },
+                    { id: 'road', label: 'Road', Icon: Car },
+                    { id: 'waterway', label: 'Water', Icon: Ship }
+                  ].map((mode) => (
+                    <button
+                      key={mode.id}
+                      type="button"
+                      onClick={() => setTransportMode(mode.id as any)}
+                      className={`flex-1 py-3 px-2 rounded-2xl border transition-all cursor-pointer flex flex-col items-center gap-2 relative overflow-hidden ${
+                        transportMode === mode.id
+                          ? 'bg-slate-900 border-slate-900 text-white shadow-lg'
+                          : 'bg-white border-slate-100 text-slate-500 hover:border-slate-200'
+                      }`}
+                    >
+                      <div className={`p-2 rounded-xl ${transportMode === mode.id ? 'bg-white/10' : 'bg-slate-50'}`}>
+                        <mode.Icon className={`w-4 h-4 ${transportMode === mode.id ? 'text-white' : 'text-slate-400'}`} />
+                      </div>
+                      <span className={`text-[9px] font-black uppercase ${transportMode === mode.id ? 'text-white' : 'text-slate-500'}`}>
+                        {mode.label}
+                      </span>
+                    </button>
                   ))}
-                </select>
-                <ChevronDown className="absolute right-2 top-4 w-3 h-3 text-slate-400 pointer-events-none" />
+                </div>
               </div>
             </div>
-            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight flex items-center gap-1 px-1">
-               <Wallet className="w-3 h-3" />
-               We'll track your spend against this cap
-            </p>
+
+            {/* Destination Section */}
+            <div className="space-y-4">
+              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-2">2. Destination & Title</h3>
+              {/* Destination & Autocomplete */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Where to?</label>
+                <div className="relative">
+                  <MapPin className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400" />
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Rome, Tokyo"
+                    value={destination}
+                    onChange={(e) => {
+                      setDestination(e.target.value);
+                      if (!title) setTitle(`${e.target.value} Exploration`);
+                    }}
+                    className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors font-medium text-slate-800"
+                  />
+                </div>
+              </div>
+
+              {/* Trip Custom Title */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Give it a Name</label>
+                <div className="relative">
+                  <Compass className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="e.g. Summer Break 2026"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors font-semibold text-slate-800"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Dates and Crew */}
+            <div className="space-y-4">
+              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-2">3. Timing & Crew</h3>
+              {/* Date Picker Grid */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Start Date</label>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-3.5 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                    <input
+                      type="date"
+                      required
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 rounded-xl pl-9 pr-2 py-2.5 text-xs focus:outline-none font-semibold text-slate-800"
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">End Date</label>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-3.5 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                    <input
+                      type="date"
+                      required
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 rounded-xl pl-9 pr-2 py-2.5 text-xs focus:outline-none font-semibold text-slate-800"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Party Size Counter Selector */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Traveller Count</label>
+                <div className="flex gap-1.5">
+                  {[1, 2, 3, 4, 5, 6].map((num) => (
+                    <button
+                      key={num}
+                      type="button"
+                      onClick={() => setPartySize(num)}
+                      className={`flex-1 py-2 text-xs font-bold rounded-xl border transition-all cursor-pointer ${
+                        partySize === num
+                          ? 'bg-[#2563EB] border-[#2563EB] text-white shadow-sm'
+                          : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                      }`}
+                    >
+                      {num === 1 ? 'Solo' : `${num}`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Economy Section */}
+            <div className="space-y-4">
+              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-2">4. Financials</h3>
+              {/* Set Budget Input */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Trip Economy</label>
+                <div className="flex gap-3">
+                  <div className="relative flex-1">
+                    <div className="absolute left-3.5 top-[13.5px] text-xs font-extrabold text-slate-400 pointer-events-none select-none font-sans">
+                      {getCurrencySymbol(currency)}
+                    </div>
+                    <input
+                      type="number"
+                      required
+                      min="100"
+                      step="50"
+                      value={budget}
+                      onChange={(e) => setBudget(Number(e.target.value))}
+                      className="w-full bg-white border border-slate-200 focus:border-brand-primary rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none transition-all font-black text-slate-800 shadow-sm"
+                      placeholder="Set Budget"
+                    />
+                  </div>
+                  
+                  <div className="relative w-28 shrink-0">
+                    <Globe className="absolute left-3 top-3.5 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                    <select
+                      value={currency}
+                      onChange={(e) => setCurrency(e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl pl-8 pr-2 py-3 text-[10px] font-black appearance-none outline-none focus:border-brand-primary transition-all text-slate-700 shadow-sm"
+                    >
+                      {currencies.map(c => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-2 top-4 w-3 h-3 text-slate-400 pointer-events-none" />
+                  </div>
+                </div>
+              </div>
+              <div className="bg-blue-50/50 p-4 rounded-2xl flex items-center gap-3 border border-blue-100 text-blue-900">
+                <Sparkles className="w-4 h-4 text-blue-500 shrink-0" />
+                <span className="text-[10px] font-bold uppercase tracking-tight">AI will track your spend against this cap</span>
+              </div>
+            </div>
           </div>
 
           {/* Submit Action */}

@@ -68,7 +68,11 @@ export default function AuthScreens({ initialMode, externalError, onNavigate }: 
       onNavigate('dashboard');
     } catch (err: any) {
       setLoading(false);
-      setValidationError(err.message || 'Error authenticating with Google. Please try again.');
+      let message = err.message || 'Error authenticating with Google. Please try again.';
+      if (err.code === 'auth/unauthorized-domain' || String(err.message).includes('unauthorized-domain')) {
+        message = "This domain is not authorized in Firebase. Please add your Vercel URL (e.g., project.vercel.app) to the 'Authorized domains' list in the Firebase Console (Authentication > Settings).";
+      }
+      setValidationError(message);
     }
   };
 
@@ -177,7 +181,7 @@ export default function AuthScreens({ initialMode, externalError, onNavigate }: 
         </span>
       </div>
 
-      <div className="bg-white dark:bg-[#1E293B] p-6 sm:p-8 rounded-[24px] border border-slate-200 dark:border-slate-800 shadow-sm w-full max-w-md relative overflow-hidden transition-colors duration-300">
+      <div className="bg-white dark:bg-[#1E293B] p-6 sm:p-8 rounded-[24px] border border-slate-200 dark:border-slate-800 shadow-sm w-full max-w-md lg:max-w-xl relative overflow-hidden transition-colors duration-300">
         
         {/* Decorative ambient gradient */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-[#2563EB]" />

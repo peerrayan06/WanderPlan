@@ -24,6 +24,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   });
   const [partySize, setPartySize] = useState(2);
   const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const activePreset = PRESET_DESTINATIONS.find(
     d => d.name.toLowerCase() === (customDestination || destination).toLowerCase()
@@ -61,7 +62,8 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate AI itinerary');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to generate AI itinerary');
       }
 
       const { itinerary } = await response.json();
@@ -173,8 +175,8 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
       </div>
 
       {/* Steps Content Area */}
-      <div className="grow flex items-center justify-center max-w-xl mx-auto w-full py-6">
-        <div className="bg-white p-6 sm:p-8 rounded-[24px] border border-slate-200 shadow-sm w-full relative">
+      <div className="grow flex items-center justify-center max-w-xl lg:max-w-4xl mx-auto w-full py-6">
+        <div className="bg-white p-6 sm:p-8 lg:p-12 rounded-[24px] border border-slate-200 shadow-sm w-full relative">
           
           {/* Progress indicators */}
           <div className="flex justify-between items-center mb-8">
@@ -197,6 +199,12 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
               </div>
             ))}
           </div>
+
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-xs font-semibold animate-pulse">
+              {error}
+            </div>
+          )}
 
           <div>
             {step === 1 && (

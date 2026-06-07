@@ -11,8 +11,15 @@ const app = express();
 const PORT = 3000;
 
 // Initialize Gemini
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
+if (!GEMINI_API_KEY) {
+  console.error("[CRITICAL ERROR] GEMINI_API_KEY is missing. AI features will not function.");
+  console.error("Please add GEMINI_API_KEY to your environment variables (e.g., in Vercel settings).");
+}
+
 const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
+  apiKey: GEMINI_API_KEY || "AI_KEY_MISSING",
   httpOptions: {
     headers: {
       'User-Agent': 'aistudio-build',
@@ -24,6 +31,9 @@ app.use(express.json());
 
 // API route for generating itinerary
 app.post('/api/validate-locations', async (req, res) => {
+  if (!GEMINI_API_KEY) {
+    return res.status(503).json({ valid: true, error: "AI Service temporarily unavailable (API Key Missing)" });
+  }
   const { origin, originCountry, destination } = req.body;
 
   const prompt = `Act as a geographical validation engine. 
@@ -67,6 +77,9 @@ app.post('/api/validate-locations', async (req, res) => {
 });
 
 app.post('/api/generate-itinerary', async (req, res) => {
+  if (!GEMINI_API_KEY) {
+    return res.status(503).json({ error: 'AI Service unavailable (API Key Missing)' });
+  }
   const { 
     destination, 
     startDate, 
@@ -177,6 +190,9 @@ app.get('/api/exchange-rates', async (req, res) => {
     const data = await response.json();
     res.json(data);
   } catch (error) {
+    if (!GEMINI_API_KEY) {
+      return res.status(503).json({ error: 'Exchange rate service unavailable' });
+    }
     // Fallback: Use Gemini to provide approximate rates if API is down
     try {
       const prompt = `Provide the current approximate exchange rates for ${base} against EUR, GBP, JPY, INR, CAD, AUD, CHF, CNY, AED. 

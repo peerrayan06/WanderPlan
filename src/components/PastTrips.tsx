@@ -71,12 +71,12 @@ export default function PastTrips({ trips, onSelectTrip, onRefresh, onBack }: Pa
         </div>
 
         {archived.length > 0 ? (
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {archived.map((trip) => (
               <div
                 key={trip.id}
                 onClick={() => onSelectTrip(trip.id)}
-                className="bg-white rounded-[24px] border border-slate-200 overflow-hidden shadow-sm hover:shadow-md cursor-pointer transition-all flex h-28"
+                className="bg-white rounded-[24px] border border-slate-200 overflow-hidden shadow-sm hover:shadow-premium hover:border-blue-400 cursor-pointer transition-all flex h-32"
               >
                 {/* Visual Cover on Left side */}
                 <div className="w-24 relative overflow-hidden shrink-0 bg-slate-100">

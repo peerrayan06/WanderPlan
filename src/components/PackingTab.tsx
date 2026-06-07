@@ -109,9 +109,8 @@ export default function PackingTab({ trip }: PackingTabProps) {
           ))}
         </div>
       </div>
-
       {/* Grouped categories list blocks */}
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-4">
         {categories.map((catName) => {
           const categoryItems = items.filter(i => i.category.toLowerCase() === catName.toLowerCase());
           if (categoryItems.length === 0) return null;
@@ -196,7 +195,7 @@ export default function PackingTab({ trip }: PackingTabProps) {
       </div>
 
       {/* Inline add item footer block */}
-      <div className="bg-white dark:bg-slate-900 mx-auto p-6 rounded-[32px] shadow-premium relative overflow-hidden group border border-slate-100 dark:border-slate-800/80 mt-8">
+      <div className="bg-white dark:bg-slate-900 mx-auto p-6 rounded-[32px] shadow-premium relative overflow-hidden group border border-slate-100 dark:border-slate-800/80 mt-8 max-w-2xl">
         {/* Abstract background accent */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-brand-primary/10 dark:bg-brand-primary/20 blur-3xl -mr-16 -mt-16 pointer-events-none" />
         <form onSubmit={handleCreateCustomItem} className="space-y-4 relative z-10">
